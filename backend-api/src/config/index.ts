@@ -5,4 +5,5 @@ export { default as redisConfig } from './redis.config';
 export { default as mailConfig } from './mail.config';
 export { default as queueConfig } from './queue.config';
 export { default as monitoringConfig } from './monitoring.config';
+export { default as messagingConfig } from './messaging.config';
 export { validate } from './env.validation';
