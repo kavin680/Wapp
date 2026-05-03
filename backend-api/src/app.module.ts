@@ -13,6 +13,7 @@ import {
   mailConfig,
   queueConfig,
   monitoringConfig,
+  messagingConfig,
   validate,
 } from './config';
 
@@ -34,6 +35,16 @@ import { FeatureFlagsModule } from './modules/feature-flags/feature-flags.module
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { WebhooksModule } from './modules/webhooks/webhooks.module';
 import { FileUploadModule } from './modules/file-upload/file-upload.module';
+import { MessagingModule } from './modules/messaging/messaging.module';
+import { ContactsModule } from './modules/contacts/contacts.module';
+import { TemplatesModule } from './modules/templates/templates.module';
+import { ConversationsModule } from './modules/conversations/conversations.module';
+import { CampaignsModule } from './modules/campaigns/campaigns.module';
+import { BillingModule } from './modules/billing/billing.module';
+import { AnalyticsModule } from './modules/analytics/analytics.module';
+import { SettingsModule } from './modules/settings/settings.module';
+import { ApiKeysModule } from './modules/api-keys/api-keys.module';
+import { WebhookEventsModule } from './modules/webhook-events/webhook-events.module';
 
 // Common
 import { JwtAuthGuard } from './modules/auth/guards';
@@ -55,6 +66,7 @@ import { RequestIdMiddleware } from './common/middleware';
         mailConfig,
         queueConfig,
         monitoringConfig,
+        messagingConfig,
       ],
       envFilePath: ['.env.local', '.env'],
       validate,
@@ -87,6 +99,18 @@ import { RequestIdMiddleware } from './common/middleware';
     NotificationsModule,
     WebhooksModule,
     FileUploadModule,
+
+    // Messaging platform modules
+    MessagingModule,
+    ContactsModule,
+    TemplatesModule,
+    ConversationsModule,
+    CampaignsModule,
+    BillingModule,
+    AnalyticsModule,
+    SettingsModule,
+    ApiKeysModule,
+    WebhookEventsModule,
   ],
   providers: [
     // Global JWT auth guard

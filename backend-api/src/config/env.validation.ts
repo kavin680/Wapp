@@ -53,6 +53,30 @@ class EnvironmentVariables {
   @IsNumber()
   @IsOptional()
   REDIS_PORT: number = 6379;
+
+  @IsString()
+  @IsOptional()
+  WHATSAPP_API_URL: string = 'https://graph.facebook.com/v21.0';
+
+  @IsString()
+  @IsOptional()
+  WHATSAPP_API_TOKEN: string = '';
+
+  @IsString()
+  @IsOptional()
+  WHATSAPP_PHONE_NUMBER_ID: string = '';
+
+  @IsString()
+  @IsOptional()
+  WHATSAPP_BUSINESS_ACCOUNT_ID: string = '';
+
+  @IsString()
+  @IsOptional()
+  WHATSAPP_WEBHOOK_VERIFY_TOKEN: string = '';
+
+  @IsString()
+  @IsOptional()
+  WHATSAPP_APP_SECRET: string = '';
 }
 
 export function validate(config: Record<string, unknown>) {

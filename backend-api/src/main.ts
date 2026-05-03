@@ -73,6 +73,16 @@ async function bootstrap() {
       .addTag('Notifications', 'User Notifications')
       .addTag('Webhooks', 'Webhook Management')
       .addTag('File Upload', 'File Upload & Storage')
+      .addTag('Messaging', 'Messaging Provider & Message Sending')
+      .addTag('Contacts', 'Contact Management')
+      .addTag('Templates', 'Message Template Management')
+      .addTag('Conversations', 'Conversation Inbox')
+      .addTag('Campaigns', 'Campaign Management')
+      .addTag('Billing', 'Billing & Usage Tracking')
+      .addTag('Analytics', 'Analytics & Reporting')
+      .addTag('Settings', 'System Settings & User Preferences')
+      .addTag('API Keys', 'API Key Management')
+      .addTag('Webhook Events', 'Webhook Event Processing')
       .build();
 
     const document = SwaggerModule.createDocument(app, swaggerConfig);
