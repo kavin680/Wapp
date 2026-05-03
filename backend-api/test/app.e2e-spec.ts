@@ -482,6 +482,213 @@ describe('Enterprise Backend (e2e)', () => {
     });
   });
 
+  // ─── Messaging Platform ─────────────────────────────────────
+
+  describe('Messaging Platform', () => {
+    let providerId: string;
+    let contactId: string;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    let templateId: string;
+    let campaignId: string;
+
+    it('POST /api/v1/messaging/providers — creates a provider', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/api/v1/messaging/providers')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          name: 'WhatsApp Cloud API',
+          type: 'WHATSAPP',
+          description: 'E2E test provider',
+          isActive: true,
+        })
+        .expect(201);
+
+      expect(res.body.data.type).toBe('WHATSAPP');
+      expect(res.body.data.isActive).toBe(true);
+      providerId = res.body.data.id;
+    });
+
+    it('GET /api/v1/messaging/providers — lists providers', () => {
+      return request(app.getHttpServer())
+        .get('/api/v1/messaging/providers')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(200)
+        .expect((res) => {
+          expect(Array.isArray(res.body.data)).toBe(true);
+          expect(res.body.data.length).toBeGreaterThan(0);
+        });
+    });
+
+    it('POST /api/v1/messaging/providers/:id/configure — configures provider', async () => {
+      const res = await request(app.getHttpServer())
+        .post(`/api/v1/messaging/providers/${providerId}/configure`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          credentials: { apiToken: 'test-token' },
+          settings: { rateLimit: 80 },
+          phoneNumberId: '123456',
+          businessAccountId: '789012',
+        })
+        .expect(201);
+
+      expect(res.body.data.phoneNumberId).toBe('123456');
+      expect(res.body.data.webhookSecret).toMatch(/^whsec_/);
+    });
+
+    it('POST /api/v1/contacts — creates a contact', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/api/v1/contacts')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          phoneNumber: '+1234567890',
+          firstName: 'E2E',
+          lastName: 'Contact',
+          tags: ['test'],
+        })
+        .expect(201);
+
+      expect(res.body.data.phoneNumber).toBe('+1234567890');
+      contactId = res.body.data.id;
+    });
+
+    it('PATCH /api/v1/contacts/:id/opt-in — opt in contact', () => {
+      return request(app.getHttpServer())
+        .patch(`/api/v1/contacts/${contactId}/opt-in`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(200)
+        .expect((res) => {
+          expect(res.body.data.optInStatus).toBe('OPTED_IN');
+        });
+    });
+
+    it('POST /api/v1/templates — creates a template', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/api/v1/templates')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          providerId,
+          name: 'e2e_welcome',
+          language: 'en',
+          category: 'MARKETING',
+          bodyContent: 'Hello {{1}}, welcome!',
+        })
+        .expect(201);
+
+      expect(res.body.data.name).toBe('e2e_welcome');
+      templateId = res.body.data.id;
+    });
+
+    it('POST /api/v1/messaging/send — sends a message (graceful failure)', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/api/v1/messaging/send')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          to: '+1234567890',
+          type: 'TEXT',
+          content: { body: 'Hello from E2E test' },
+          providerId,
+        })
+        .expect(200);
+
+      expect(res.body.data.message.direction).toBe('OUTBOUND');
+    });
+
+    it('GET /api/v1/conversations — auto-created conversation exists', () => {
+      return request(app.getHttpServer())
+        .get('/api/v1/conversations')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(200)
+        .expect((res) => {
+          expect(res.body.data.length).toBeGreaterThan(0);
+        });
+    });
+
+    it('POST /api/v1/campaigns — creates a campaign', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/api/v1/campaigns')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          providerId,
+          name: 'E2E Test Campaign',
+          description: 'Test campaign from E2E',
+          channel: 'WHATSAPP',
+        })
+        .expect(201);
+
+      expect(res.body.data.name).toBe('E2E Test Campaign');
+      expect(res.body.data.status).toBe('DRAFT');
+      campaignId = res.body.data.id;
+    });
+
+    it('POST /api/v1/campaigns/:id/recipients — adds recipients', () => {
+      return request(app.getHttpServer())
+        .post(`/api/v1/campaigns/${campaignId}/recipients`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ contactIds: [contactId] })
+        .expect(201)
+        .expect((res) => {
+          expect(res.body.data.added).toBe(1);
+        });
+    });
+
+    it('POST /api/v1/api-keys — generates an API key', () => {
+      return request(app.getHttpServer())
+        .post('/api/v1/api-keys')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          name: 'E2E Test Key',
+          scopes: ['messaging:send'],
+        })
+        .expect(201)
+        .expect((res) => {
+          expect(res.body.data.key).toBeDefined();
+          expect(res.body.data.scopes).toContain('messaging:send');
+        });
+    });
+
+    it('POST /api/v1/settings/system — creates a system setting', () => {
+      return request(app.getHttpServer())
+        .post('/api/v1/settings/system')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          category: 'messaging',
+          key: `e2e_retry_${Date.now()}`,
+          value: 5,
+          description: 'E2E test setting',
+          isPublic: false,
+        })
+        .expect(201)
+        .expect((res) => {
+          expect(res.body.data.value).toBe(5);
+        });
+    });
+
+    it('GET /api/v1/analytics/dashboard — returns analytics', () => {
+      return request(app.getHttpServer())
+        .get('/api/v1/analytics/dashboard')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(200)
+        .expect((res) => {
+          expect(res.body.data).toHaveProperty('messages');
+          expect(res.body.data).toHaveProperty('conversations');
+        });
+    });
+
+    it('GET /api/v1/billing/summary — returns billing data', () => {
+      return request(app.getHttpServer())
+        .get('/api/v1/billing/summary')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(200);
+    });
+
+    it('GET /api/v1/settings/system — USER role gets 403', () => {
+      return request(app.getHttpServer())
+        .get('/api/v1/settings/system')
+        .set('Authorization', `Bearer ${userToken}`)
+        .expect(403);
+    });
+  });
+
   // ─── Response Structure ───────────────────────────────────
 
   describe('Response Structure', () => {
