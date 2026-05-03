@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString } from 'class-validator';
+import { Allow, IsString } from 'class-validator';
 
 export class SetUserPreferenceDto {
   @ApiProperty({ example: 'notification_sound' })
@@ -7,5 +7,6 @@ export class SetUserPreferenceDto {
   key: string;
 
   @ApiProperty({ example: true })
+  @Allow()
   value: unknown;
 }

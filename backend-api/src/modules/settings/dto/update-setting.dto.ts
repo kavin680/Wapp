@@ -1,8 +1,10 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsOptional, IsString } from 'class-validator';
+import { Allow, IsBoolean, IsOptional, IsString } from 'class-validator';
 
 export class UpdateSettingDto {
   @ApiPropertyOptional()
+  @IsOptional()
+  @Allow()
   value?: unknown;
 
   @ApiPropertyOptional()

@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsOptional, IsString } from 'class-validator';
+import { Allow, IsBoolean, IsOptional, IsString } from 'class-validator';
 
 export class CreateSettingDto {
   @ApiProperty({ example: 'messaging' })
@@ -11,6 +11,7 @@ export class CreateSettingDto {
   key: string;
 
   @ApiProperty({ example: 3 })
+  @Allow()
   value: unknown;
 
   @ApiPropertyOptional()
