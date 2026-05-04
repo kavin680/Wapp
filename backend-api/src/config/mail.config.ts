@@ -7,5 +7,5 @@ export default registerAs('mail', () => ({
   secure: process.env.MAIL_SECURE === 'true' || false,
   user: process.env.MAIL_USER || '',
   password: process.env.MAIL_PASSWORD || '',
-  from: process.env.MAIL_FROM || '"Enterprise App" <noreply@enterprise.com>',
+  from: process.env.MAIL_FROM || '"Wapp" <noreply@wapp.com>',
 }));

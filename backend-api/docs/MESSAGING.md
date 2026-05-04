@@ -1,4 +1,4 @@
-# Enterprise Messaging Platform — Architecture & API Guide
+# Wapp Messaging Platform — Architecture & API Guide
 
 ## Overview
 
