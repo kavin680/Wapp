@@ -1,8 +1,8 @@
 {
-  "name": "enterprise-backend",
+  "name": "wapp-backend",
   "version": "1.0.0",
-  "description": "Enterprise-grade NestJS backend framework with Prisma, JWT auth, audit logging, and more",
-  "author": "Enterprise Team",
+  "description": "WhatsApp Business API messaging platform built with NestJS, Prisma, and the Meta Cloud API",
+  "author": "Wapp Team",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {

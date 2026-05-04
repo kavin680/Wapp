@@ -100,8 +100,8 @@ async function bootstrap() {
   // Swagger
   if (configService.get<string>('app.env') !== 'production') {
     const swaggerConfig = new DocumentBuilder()
-      .setTitle('Enterprise Backend API')
-      .setDescription('Enterprise-grade NestJS Backend Framework API')
+      .setTitle('Wapp — WhatsApp Messaging API')
+      .setDescription('WhatsApp Business API messaging platform — send messages, manage contacts, run campaigns, and more')
       .setVersion('1.0')
       .addBearerAuth()
       .addTag('Auth', 'Authentication & Authorization')

@@ -1,6 +1,6 @@
 # Developer Guide
 
-Complete guide for setting up, developing, and extending the Enterprise Messaging Platform.
+Complete guide for setting up, developing, and extending Wapp.
 
 ## Prerequisites
 
@@ -29,7 +29,7 @@ Edit `.env` with your settings. Key variables:
 
 ```env
 # Required
-DATABASE_URL="postgresql://postgres:password@localhost:5432/enterprise_db?schema=public"
+DATABASE_URL="postgresql://postgres:password@localhost:5432/wapp_db?schema=public"
 JWT_SECRET=your-jwt-secret-min-32-chars
 JWT_REFRESH_SECRET=your-refresh-secret-min-32-chars
 

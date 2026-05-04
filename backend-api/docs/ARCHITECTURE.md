@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Enterprise Messaging Platform is built as a modular, layered NestJS application with a plugin-based provider architecture for multi-channel messaging.
+Wapp is built as a modular, layered NestJS application with a plugin-based provider architecture for multi-channel messaging.
 
 ## System Architecture
 
