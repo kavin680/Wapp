@@ -8,7 +8,7 @@ import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
 import { join } from 'path';
-import * as hbs from 'hbs';
+import hbs from 'hbs';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -76,8 +76,10 @@ async function bootstrap() {
     ],
   });
 
-  // Global prefix
-  app.setGlobalPrefix(apiPrefix);
+  // Global prefix (exclude admin UI and health/docs routes)
+  app.setGlobalPrefix(apiPrefix, {
+    exclude: ['admin', 'admin/(.*)', 'docs', 'docs/(.*)'],
+  });
 
   // API Versioning
   app.enableVersioning({

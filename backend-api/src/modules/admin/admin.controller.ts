@@ -10,6 +10,7 @@ import {
   UseInterceptors,
   UploadedFile,
   Logger,
+  VERSION_NEUTRAL,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiExcludeController } from '@nestjs/swagger';
@@ -32,7 +33,7 @@ interface AdminSession {
 }
 
 @ApiExcludeController()
-@Controller('admin')
+@Controller({ path: 'admin', version: VERSION_NEUTRAL })
 @Public()
 export class AdminController {
   private readonly logger = new Logger(AdminController.name);
@@ -93,7 +94,7 @@ export class AdminController {
   @Get('login')
   loginPage(@Req() req: any, @Res() res: any) {
     if (this.isAuthenticated(req)) return res.redirect('/admin');
-    return res.render('login', { layout: 'main', title: 'Login' });
+    return res.render('login', { layout: 'layouts/main', title: 'Login' });
   }
 
   @Post('login')
@@ -117,7 +118,7 @@ export class AdminController {
       return res.redirect('/admin');
     } catch {
       return res.render('login', {
-        layout: 'main',
+        layout: 'layouts/main',
         title: 'Login',
         error: 'Invalid email or password',
         email: body.email,
@@ -168,7 +169,7 @@ export class AdminController {
       const recentMessages = await this.getRecentMessages(session.userId!);
 
       return res.render('dashboard', {
-        layout: 'main',
+        layout: 'layouts/main',
         title: 'Dashboard',
         user: { email: session.email, role: session.role },
         flash: req.query?.flash,
@@ -185,7 +186,7 @@ export class AdminController {
     } catch (error) {
       this.logger.error('Dashboard error', (error as Error).stack);
       return res.render('dashboard', {
-        layout: 'main',
+        layout: 'layouts/main',
         title: 'Dashboard',
         user: { email: session.email, role: session.role },
         stats: {
@@ -218,7 +219,7 @@ export class AdminController {
     }));
 
     return res.render('providers', {
-      layout: 'main',
+      layout: 'layouts/main',
       title: 'Providers',
       user: { email: session.email, role: session.role },
       providers,
@@ -328,7 +329,7 @@ export class AdminController {
     }));
 
     return res.render('contacts', {
-      layout: 'main',
+      layout: 'layouts/main',
       title: 'Contacts',
       user: { email: session.email, role: session.role },
       contacts,
@@ -426,7 +427,7 @@ export class AdminController {
     const messages = await this.getRecentMessages(session.userId!, 50);
 
     return res.render('messages', {
-      layout: 'main',
+      layout: 'layouts/main',
       title: 'Messages',
       user: { email: session.email, role: session.role },
       providers: providersResult.data || [],
@@ -492,7 +493,7 @@ export class AdminController {
     });
 
     return res.render('conversations', {
-      layout: 'main',
+      layout: 'layouts/main',
       title: 'Conversations',
       user: { email: session.email, role: session.role },
       conversations,
@@ -513,7 +514,7 @@ export class AdminController {
     }));
 
     return res.render('templates', {
-      layout: 'main',
+      layout: 'layouts/main',
       title: 'Templates',
       user: { email: session.email, role: session.role },
       templates,
@@ -604,7 +605,7 @@ export class AdminController {
     }));
 
     return res.render('campaigns', {
-      layout: 'main',
+      layout: 'layouts/main',
       title: 'Campaigns',
       user: { email: session.email, role: session.role },
       providers: providersResult.data || [],
@@ -737,7 +738,7 @@ export class AdminController {
     }));
 
     return res.render('media', {
-      layout: 'main',
+      layout: 'layouts/main',
       title: 'Media',
       user: { email: session.email, role: session.role },
       media,
@@ -822,7 +823,7 @@ export class AdminController {
     }));
 
     return res.render('settings', {
-      layout: 'main',
+      layout: 'layouts/main',
       title: 'Settings',
       user: { email: session.email, role: session.role },
       settings: formattedSettings,
