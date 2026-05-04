@@ -1,16 +1,20 @@
 import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { ConfigService } from '@nestjs/config';
 import { ValidationPipe, Logger, VersioningType } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
+import session from 'express-session';
+import { join } from 'path';
+import * as hbs from 'hbs';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
 
-  const app = await NestFactory.create(AppModule, {
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     bufferLogs: true,
   });
 
@@ -22,9 +26,42 @@ async function bootstrap() {
   ];
 
   // Security
-  app.use(helmet());
+  app.use(
+    helmet({
+      contentSecurityPolicy: false,
+    }),
+  );
   app.use(compression());
   app.use(cookieParser());
+
+  // Session for admin UI
+  app.use(
+    session({
+      secret:
+        configService.get<string>('auth.jwtSecret') || 'admin-session-secret',
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        maxAge: 24 * 60 * 60 * 1000,
+        httpOnly: true,
+        secure: configService.get<string>('app.env') === 'production',
+      },
+    }),
+  );
+
+  // Handlebars view engine
+  const viewsPath = join(__dirname, '..', 'views');
+  app.setBaseViewsDir(viewsPath);
+  app.setViewEngine('hbs');
+  hbs.registerPartials(join(viewsPath, 'partials'));
+  hbs.registerHelper('eq', (a: unknown, b: unknown) => a === b);
+  hbs.registerHelper('or', (...args: unknown[]) => {
+    const options = args.pop();
+    return args.some(Boolean) ? (options as Record<string, unknown>) : false;
+  });
+
+  // Static files
+  app.useStaticAssets(join(__dirname, '..', 'public'), { prefix: '/public/' });
 
   // CORS
   app.enableCors({
@@ -103,6 +140,7 @@ async function bootstrap() {
   await app.listen(port);
   logger.log(`Application running on http://localhost:${port}`);
   logger.log(`API available at http://localhost:${port}/${apiPrefix}`);
+  logger.log(`Admin UI available at http://localhost:${port}/admin`);
 }
 
 void bootstrap();

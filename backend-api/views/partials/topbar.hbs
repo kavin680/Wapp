@@ -1,0 +1,9 @@
+<header class="topbar">
+  <h2>{{pageTitle}}</h2>
+  <div class="topbar-actions">
+    {{#if user}}
+    <span class="text-muted">{{user.email}}</span>
+    <span class="badge badge-info">{{user.role}}</span>
+    {{/if}}
+  </div>
+</header>

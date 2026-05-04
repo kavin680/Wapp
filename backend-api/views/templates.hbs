@@ -1,0 +1,111 @@
+<div class="app-layout">
+  {{> sidebar page="templates"}}
+  <div class="main-content">
+    {{> topbar pageTitle="Templates" user=user}}
+    <div class="content-area">
+
+      {{#if flash}}
+      <div class="alert alert-success">{{flash}}</div>
+      {{/if}}
+      {{#if error}}
+      <div class="alert alert-danger">{{error}}</div>
+      {{/if}}
+
+      <div class="card">
+        <div class="card-header">
+          <h3>Message Templates ({{templates.length}})</h3>
+          <button class="btn btn-primary btn-sm" onclick="openModal('createTemplateModal')">+ New Template</button>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Channel</th>
+                <th>Category</th>
+                <th>Status</th>
+                <th>Language</th>
+                <th>Created</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each templates}}
+              <tr>
+                <td><strong>{{this.name}}</strong></td>
+                <td><span class="badge badge-info">{{this.channel}}</span></td>
+                <td>{{this.category}}</td>
+                <td>
+                  {{#if (eq this.status 'APPROVED')}}<span class="badge badge-success">Approved</span>
+                  {{else if (eq this.status 'REJECTED')}}<span class="badge badge-danger">Rejected</span>
+                  {{else}}<span class="badge badge-warning">{{this.status}}</span>
+                  {{/if}}
+                </td>
+                <td>{{this.language}}</td>
+                <td class="text-muted">{{this.createdAt}}</td>
+                <td>
+                  <form method="POST" action="/admin/templates/{{this.id}}/delete" style="display:inline">
+                    <button class="btn btn-danger btn-sm">Delete</button>
+                  </form>
+                </td>
+              </tr>
+              {{else}}
+              <tr><td colspan="7" class="empty-state">No templates yet</td></tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Create Template Modal -->
+<div class="modal-backdrop" id="createTemplateModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Create Template</h3>
+      <button class="modal-close" onclick="closeModal('createTemplateModal')">&times;</button>
+    </div>
+    <form method="POST" action="/admin/templates">
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="templateName">Template Name</label>
+          <input type="text" id="templateName" name="name" class="form-control" placeholder="e.g. welcome_message" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="templateChannel">Channel</label>
+            <select id="templateChannel" name="channel" class="form-control">
+              <option value="WHATSAPP">WhatsApp</option>
+              <option value="SMS">SMS</option>
+              <option value="EMAIL">Email</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="category">Category</label>
+            <select id="category" name="category" class="form-control">
+              <option value="MARKETING">Marketing</option>
+              <option value="UTILITY">Utility</option>
+              <option value="AUTHENTICATION">Authentication</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="language">Language</label>
+          <input type="text" id="language" name="language" class="form-control" value="en" placeholder="e.g. en">
+        </div>
+        <div class="form-group">
+          <label for="content">Template Content</label>
+          <textarea id="templateContent" name="content" class="form-control" rows="4" placeholder="Hello {{1}}, welcome to our service!" required></textarea>
+          <div class="form-hint">Use {{1}}, {{2}} etc. for variable placeholders</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('createTemplateModal')">Cancel</button>
+        <button type="submit" class="btn btn-primary">Create Template</button>
+      </div>
+    </form>
+  </div>
+</div>

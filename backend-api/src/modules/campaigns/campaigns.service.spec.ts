@@ -98,13 +98,13 @@ describe('CampaignsService', () => {
       const dto = {
         providerId: 'prov-1',
         name: 'Summer Sale',
-        channel: 'WHATSAPP',
+        channel: 'WHATSAPP' as const,
       };
       const created = { id: '1', ...dto, userId: 'user-1', status: 'DRAFT' };
       mockPrisma.campaign.create.mockResolvedValue(created);
       mockPrisma.campaign.findFirst.mockResolvedValue(created);
 
-      const result = await service.create(dto, 'user-1');
+      const result = await service.create(dto as any, 'user-1');
       expect(result.name).toBe('Summer Sale');
     });
   });

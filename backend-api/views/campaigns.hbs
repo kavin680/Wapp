@@ -1,0 +1,125 @@
+<div class="app-layout">
+  {{> sidebar page="campaigns"}}
+  <div class="main-content">
+    {{> topbar pageTitle="Campaigns" user=user}}
+    <div class="content-area">
+
+      {{#if flash}}
+      <div class="alert alert-success">{{flash}}</div>
+      {{/if}}
+      {{#if error}}
+      <div class="alert alert-danger">{{error}}</div>
+      {{/if}}
+
+      <div class="card">
+        <div class="card-header">
+          <h3>Campaigns ({{campaigns.length}})</h3>
+          <button class="btn btn-primary btn-sm" onclick="openModal('createCampaignModal')">+ New Campaign</button>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Status</th>
+                <th>Channel</th>
+                <th>Recipients</th>
+                <th>Sent</th>
+                <th>Failed</th>
+                <th>Scheduled</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each campaigns}}
+              <tr>
+                <td><strong>{{this.name}}</strong></td>
+                <td>
+                  {{#if (eq this.status 'COMPLETED')}}<span class="badge badge-success">Completed</span>
+                  {{else if (eq this.status 'RUNNING')}}<span class="badge badge-info">Running</span>
+                  {{else if (eq this.status 'FAILED')}}<span class="badge badge-danger">Failed</span>
+                  {{else if (eq this.status 'PAUSED')}}<span class="badge badge-warning">Paused</span>
+                  {{else if (eq this.status 'CANCELLED')}}<span class="badge badge-danger">Cancelled</span>
+                  {{else if (eq this.status 'SCHEDULED')}}<span class="badge badge-info">Scheduled</span>
+                  {{else}}<span class="badge badge-default">{{this.status}}</span>
+                  {{/if}}
+                </td>
+                <td><span class="badge badge-info">{{this.channel}}</span></td>
+                <td>{{this.recipientCount}}</td>
+                <td>{{this.sentCount}}</td>
+                <td>{{this.failedCount}}</td>
+                <td class="text-muted">{{this.scheduledAt}}</td>
+                <td>
+                  {{#if (eq this.status 'DRAFT')}}
+                  <form method="POST" action="/admin/campaigns/{{this.id}}/start" style="display:inline">
+                    <button class="btn btn-success btn-sm">Start</button>
+                  </form>
+                  {{/if}}
+                  {{#if (eq this.status 'RUNNING')}}
+                  <form method="POST" action="/admin/campaigns/{{this.id}}/pause" style="display:inline">
+                    <button class="btn btn-warning btn-sm">Pause</button>
+                  </form>
+                  {{/if}}
+                  {{#if (eq this.status 'PAUSED')}}
+                  <form method="POST" action="/admin/campaigns/{{this.id}}/resume" style="display:inline">
+                    <button class="btn btn-success btn-sm">Resume</button>
+                  </form>
+                  {{/if}}
+                  {{#if (or (eq this.status 'DRAFT') (eq this.status 'RUNNING') (eq this.status 'PAUSED'))}}
+                  <form method="POST" action="/admin/campaigns/{{this.id}}/cancel" style="display:inline">
+                    <button class="btn btn-danger btn-sm">Cancel</button>
+                  </form>
+                  {{/if}}
+                </td>
+              </tr>
+              {{else}}
+              <tr><td colspan="8" class="empty-state">No campaigns yet</td></tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Create Campaign Modal -->
+<div class="modal-backdrop" id="createCampaignModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Create Campaign</h3>
+      <button class="modal-close" onclick="closeModal('createCampaignModal')">&times;</button>
+    </div>
+    <form method="POST" action="/admin/campaigns">
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="campaignName">Campaign Name</label>
+          <input type="text" id="campaignName" name="name" class="form-control" placeholder="e.g. Welcome Campaign" required>
+        </div>
+        <div class="form-group">
+          <label for="campaignProvider">Provider</label>
+          <select id="campaignProvider" name="providerId" class="form-control" required>
+            <option value="">Select Provider</option>
+            {{#each providers}}
+            <option value="{{this.id}}">{{this.name}} ({{this.channel}})</option>
+            {{/each}}
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="campaignContent">Message Content</label>
+          <textarea id="campaignContent" name="content" class="form-control" rows="3" placeholder="Campaign message text..." required></textarea>
+        </div>
+        <div class="form-group">
+          <label for="scheduledAt">Schedule (optional)</label>
+          <input type="datetime-local" id="scheduledAt" name="scheduledAt" class="form-control">
+          <div class="form-hint">Leave empty to start manually</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('createCampaignModal')">Cancel</button>
+        <button type="submit" class="btn btn-primary">Create Campaign</button>
+      </div>
+    </form>
+  </div>
+</div>
