@@ -1,0 +1,144 @@
+<div class="app-layout">
+  {{> sidebar page="providers"}}
+  <div class="main-content">
+    {{> topbar pageTitle="Providers" user=user}}
+    <div class="content-area">
+
+      {{#if flash}}
+      <div class="alert alert-success">{{flash}}</div>
+      {{/if}}
+      {{#if error}}
+      <div class="alert alert-danger">{{error}}</div>
+      {{/if}}
+
+      <div class="card">
+        <div class="card-header">
+          <h3>Messaging Providers</h3>
+          <button class="btn btn-primary btn-sm" onclick="openModal('createProviderModal')">+ Add Provider</button>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Channel</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each providers}}
+              <tr>
+                <td><strong>{{this.name}}</strong></td>
+                <td>{{this.type}}</td>
+                <td><span class="badge badge-info">{{this.channel}}</span></td>
+                <td>
+                  {{#if this.isActive}}<span class="badge badge-success">Active</span>
+                  {{else}}<span class="badge badge-default">Inactive</span>
+                  {{/if}}
+                </td>
+                <td class="text-muted">{{this.createdAt}}</td>
+                <td>
+                  <form method="POST" action="/admin/providers/{{this.id}}/toggle" style="display:inline">
+                    <button class="btn btn-sm {{#if this.isActive}}btn-warning{{else}}btn-success{{/if}}">
+                      {{#if this.isActive}}Disable{{else}}Enable{{/if}}
+                    </button>
+                  </form>
+                  <button class="btn btn-outline btn-sm" onclick="openConfigModal('{{this.id}}','{{this.name}}')">Configure</button>
+                </td>
+              </tr>
+              {{else}}
+              <tr><td colspan="6" class="empty-state">No providers configured</td></tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Create Provider Modal -->
+<div class="modal-backdrop" id="createProviderModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Add Provider</h3>
+      <button class="modal-close" onclick="closeModal('createProviderModal')">&times;</button>
+    </div>
+    <form method="POST" action="/admin/providers">
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="name">Provider Name</label>
+          <input type="text" id="name" name="name" class="form-control" placeholder="e.g. WhatsApp Production" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="type">Type</label>
+            <select id="type" name="type" class="form-control">
+              <option value="WHATSAPP">WhatsApp</option>
+              <option value="SMS">SMS</option>
+              <option value="EMAIL">Email</option>
+              <option value="TELEGRAM">Telegram</option>
+              <option value="MESSENGER">Messenger</option>
+              <option value="SLACK">Slack</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="channel">Channel</label>
+            <select id="channel" name="channel" class="form-control">
+              <option value="WHATSAPP">WhatsApp</option>
+              <option value="SMS">SMS</option>
+              <option value="EMAIL">Email</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="description">Description</label>
+          <input type="text" id="description" name="description" class="form-control" placeholder="Optional description">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('createProviderModal')">Cancel</button>
+        <button type="submit" class="btn btn-primary">Create Provider</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Configure Provider Modal -->
+<div class="modal-backdrop" id="configProviderModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Configure <span id="configProviderName"></span></h3>
+      <button class="modal-close" onclick="closeModal('configProviderModal')">&times;</button>
+    </div>
+    <form method="POST" id="configForm" action="/admin/providers/configure">
+      <input type="hidden" id="configProviderId" name="providerId">
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="apiToken">API Token</label>
+          <input type="text" id="apiToken" name="apiToken" class="form-control" placeholder="WhatsApp Cloud API Token">
+        </div>
+        <div class="form-group">
+          <label for="phoneNumberId">Phone Number ID</label>
+          <input type="text" id="phoneNumberId" name="phoneNumberId" class="form-control" placeholder="Meta Phone Number ID">
+        </div>
+        <div class="form-group">
+          <label for="businessAccountId">Business Account ID</label>
+          <input type="text" id="businessAccountId" name="businessAccountId" class="form-control" placeholder="WhatsApp Business Account ID">
+        </div>
+        <div class="form-group">
+          <label for="webhookSecret">Webhook Verify Token</label>
+          <input type="text" id="webhookSecret" name="webhookSecret" class="form-control" placeholder="Webhook verification token">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('configProviderModal')">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save Configuration</button>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,77 @@
+<div class="app-layout">
+  {{> sidebar page="media"}}
+  <div class="main-content">
+    {{> topbar pageTitle="Media Assets" user=user}}
+    <div class="content-area">
+
+      {{#if flash}}
+      <div class="alert alert-success">{{flash}}</div>
+      {{/if}}
+      {{#if error}}
+      <div class="alert alert-danger">{{error}}</div>
+      {{/if}}
+
+      <div class="card">
+        <div class="card-header">
+          <h3>Upload Media</h3>
+        </div>
+        <form method="POST" action="/admin/media/upload" enctype="multipart/form-data">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="file">File</label>
+              <input type="file" id="file" name="file" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="mediaChannel">Channel</label>
+              <select id="mediaChannel" name="channel" class="form-control">
+                <option value="WHATSAPP">WhatsApp</option>
+                <option value="SMS">SMS</option>
+                <option value="EMAIL">Email</option>
+              </select>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary">Upload</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h3>Media Library ({{media.length}})</h3>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Filename</th>
+                <th>Type</th>
+                <th>Size</th>
+                <th>Channel</th>
+                <th>Uploaded</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each media}}
+              <tr>
+                <td><strong>{{this.filename}}</strong></td>
+                <td>{{this.mimeType}}</td>
+                <td>{{this.sizeFormatted}}</td>
+                <td><span class="badge badge-info">{{this.channel}}</span></td>
+                <td class="text-muted">{{this.createdAt}}</td>
+                <td>
+                  <form method="POST" action="/admin/media/{{this.id}}/delete" style="display:inline">
+                    <button class="btn btn-danger btn-sm">Delete</button>
+                  </form>
+                </td>
+              </tr>
+              {{else}}
+              <tr><td colspan="6" class="empty-state">No media uploaded yet</td></tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

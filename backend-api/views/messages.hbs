@@ -1,0 +1,88 @@
+<div class="app-layout">
+  {{> sidebar page="messages"}}
+  <div class="main-content">
+    {{> topbar pageTitle="Messages" user=user}}
+    <div class="content-area">
+
+      {{#if flash}}
+      <div class="alert alert-success">{{flash}}</div>
+      {{/if}}
+      {{#if error}}
+      <div class="alert alert-danger">{{error}}</div>
+      {{/if}}
+
+      <div class="card">
+        <div class="card-header">
+          <h3>Send Message</h3>
+        </div>
+        <form method="POST" action="/admin/messages/send">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="providerId">Provider</label>
+              <select id="providerId" name="providerId" class="form-control" required>
+                <option value="">Select Provider</option>
+                {{#each providers}}
+                <option value="{{this.id}}">{{this.name}} ({{this.channel}})</option>
+                {{/each}}
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="to">Recipient</label>
+              <input type="text" id="to" name="to" class="form-control" placeholder="+1234567890" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="content">Message</label>
+            <textarea id="content" name="content" class="form-control" rows="3" placeholder="Type your message..." required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary">Send Message</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h3>Message History</h3>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>To</th>
+                <th>Channel</th>
+                <th>Content</th>
+                <th>Direction</th>
+                <th>Status</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each messages}}
+              <tr>
+                <td>{{this.to}}</td>
+                <td><span class="badge badge-info">{{this.channel}}</span></td>
+                <td class="truncate">{{this.content}}</td>
+                <td>
+                  {{#if (eq this.direction 'OUTBOUND')}}<span class="badge badge-info">OUT</span>
+                  {{else}}<span class="badge badge-success">IN</span>
+                  {{/if}}
+                </td>
+                <td>
+                  {{#if (eq this.status 'DELIVERED')}}<span class="badge badge-success">{{this.status}}</span>
+                  {{else if (eq this.status 'FAILED')}}<span class="badge badge-danger">{{this.status}}</span>
+                  {{else if (eq this.status 'SENT')}}<span class="badge badge-info">{{this.status}}</span>
+                  {{else}}<span class="badge badge-default">{{this.status}}</span>
+                  {{/if}}
+                </td>
+                <td class="text-muted">{{this.createdAt}}</td>
+              </tr>
+              {{else}}
+              <tr><td colspan="6" class="empty-state">No messages yet</td></tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

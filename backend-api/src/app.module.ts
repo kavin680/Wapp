@@ -46,6 +46,7 @@ import { SettingsModule } from './modules/settings/settings.module';
 import { ApiKeysModule } from './modules/api-keys/api-keys.module';
 import { WebhookEventsModule } from './modules/webhook-events/webhook-events.module';
 import { MediaModule } from './modules/media/media.module';
+import { AdminModule } from './modules/admin/admin.module';
 
 // Common
 import { JwtAuthGuard } from './modules/auth/guards';
@@ -113,6 +114,7 @@ import { RequestIdMiddleware } from './common/middleware';
     ApiKeysModule,
     WebhookEventsModule,
     MediaModule,
+    AdminModule,
   ],
   providers: [
     // Global JWT auth guard

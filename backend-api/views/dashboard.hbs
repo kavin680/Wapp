@@ -1,0 +1,84 @@
+<div class="app-layout">
+  {{> sidebar page="dashboard"}}
+  <div class="main-content">
+    {{> topbar pageTitle="Dashboard" user=user}}
+    <div class="content-area">
+
+      {{#if flash}}
+      <div class="alert alert-success">{{flash}}</div>
+      {{/if}}
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">&#9993;</div>
+          <div class="stat-value">{{stats.totalMessages}}</div>
+          <div class="stat-label">Total Messages</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">&#9787;</div>
+          <div class="stat-value">{{stats.totalContacts}}</div>
+          <div class="stat-label">Contacts</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">&#128227;</div>
+          <div class="stat-value">{{stats.totalCampaigns}}</div>
+          <div class="stat-label">Campaigns</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">&#9881;</div>
+          <div class="stat-value">{{stats.totalProviders}}</div>
+          <div class="stat-label">Providers</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">&#128196;</div>
+          <div class="stat-value">{{stats.totalTemplates}}</div>
+          <div class="stat-label">Templates</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">&#128172;</div>
+          <div class="stat-value">{{stats.totalConversations}}</div>
+          <div class="stat-label">Conversations</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h3>Recent Messages</h3>
+          <a href="/admin/messages" class="btn btn-outline btn-sm">View All</a>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>To</th>
+                <th>Channel</th>
+                <th>Content</th>
+                <th>Status</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each recentMessages}}
+              <tr>
+                <td>{{this.to}}</td>
+                <td><span class="badge badge-info">{{this.channel}}</span></td>
+                <td class="truncate">{{this.content}}</td>
+                <td>
+                  {{#if (eq this.status 'DELIVERED')}}<span class="badge badge-success">{{this.status}}</span>
+                  {{else if (eq this.status 'FAILED')}}<span class="badge badge-danger">{{this.status}}</span>
+                  {{else}}<span class="badge badge-default">{{this.status}}</span>
+                  {{/if}}
+                </td>
+                <td class="text-muted">{{this.createdAt}}</td>
+              </tr>
+              {{else}}
+              <tr><td colspan="5" class="empty-state">No messages yet</td></tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

@@ -1,0 +1,48 @@
+<div class="app-layout">
+  {{> sidebar page="conversations"}}
+  <div class="main-content">
+    {{> topbar pageTitle="Conversations" user=user}}
+    <div class="content-area">
+
+      <div class="card">
+        <div class="card-header">
+          <h3>Conversation Inbox ({{conversations.length}})</h3>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Contact</th>
+                <th>Channel</th>
+                <th>Status</th>
+                <th>Last Message</th>
+                <th>Messages</th>
+                <th>Updated</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each conversations}}
+              <tr>
+                <td><strong>{{this.contactPhone}}</strong></td>
+                <td><span class="badge badge-info">{{this.channel}}</span></td>
+                <td>
+                  {{#if (eq this.status 'OPEN')}}<span class="badge badge-success">Open</span>
+                  {{else if (eq this.status 'CLOSED')}}<span class="badge badge-default">Closed</span>
+                  {{else}}<span class="badge badge-warning">{{this.status}}</span>
+                  {{/if}}
+                </td>
+                <td class="truncate">{{this.lastMessage}}</td>
+                <td>{{this.messageCount}}</td>
+                <td class="text-muted">{{this.updatedAt}}</td>
+              </tr>
+              {{else}}
+              <tr><td colspan="6" class="empty-state">No conversations yet</td></tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

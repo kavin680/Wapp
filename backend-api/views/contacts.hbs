@@ -1,0 +1,116 @@
+<div class="app-layout">
+  {{> sidebar page="contacts"}}
+  <div class="main-content">
+    {{> topbar pageTitle="Contacts" user=user}}
+    <div class="content-area">
+
+      {{#if flash}}
+      <div class="alert alert-success">{{flash}}</div>
+      {{/if}}
+      {{#if error}}
+      <div class="alert alert-danger">{{error}}</div>
+      {{/if}}
+
+      <div class="card">
+        <div class="card-header">
+          <h3>Contacts ({{contacts.length}})</h3>
+          <button class="btn btn-primary btn-sm" onclick="openModal('createContactModal')">+ Add Contact</button>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Email</th>
+                <th>Channel</th>
+                <th>Opt-in</th>
+                <th>Created</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each contacts}}
+              <tr>
+                <td><strong>{{this.firstName}} {{this.lastName}}</strong></td>
+                <td>{{this.phone}}</td>
+                <td>{{this.email}}</td>
+                <td><span class="badge badge-info">{{this.channel}}</span></td>
+                <td>
+                  {{#if this.optedIn}}<span class="badge badge-success">Yes</span>
+                  {{else}}<span class="badge badge-default">No</span>
+                  {{/if}}
+                </td>
+                <td class="text-muted">{{this.createdAt}}</td>
+                <td>
+                  <form method="POST" action="/admin/contacts/{{this.id}}/toggle-optin" style="display:inline">
+                    <button class="btn btn-sm {{#if this.optedIn}}btn-warning{{else}}btn-success{{/if}}">
+                      {{#if this.optedIn}}Opt-out{{else}}Opt-in{{/if}}
+                    </button>
+                  </form>
+                  <form method="POST" action="/admin/contacts/{{this.id}}/delete" style="display:inline">
+                    <button class="btn btn-danger btn-sm">Delete</button>
+                  </form>
+                </td>
+              </tr>
+              {{else}}
+              <tr><td colspan="7" class="empty-state">No contacts yet</td></tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Create Contact Modal -->
+<div class="modal-backdrop" id="createContactModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Add Contact</h3>
+      <button class="modal-close" onclick="closeModal('createContactModal')">&times;</button>
+    </div>
+    <form method="POST" action="/admin/contacts">
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="firstName">First Name</label>
+            <input type="text" id="firstName" name="firstName" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label for="lastName">Last Name</label>
+            <input type="text" id="lastName" name="lastName" class="form-control">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="phone">Phone Number</label>
+          <input type="text" id="phone" name="phone" class="form-control" placeholder="+1234567890" required>
+        </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="contactEmail" name="email" class="form-control" placeholder="contact@example.com">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="channel">Channel</label>
+            <select id="contactChannel" name="channel" class="form-control">
+              <option value="WHATSAPP">WhatsApp</option>
+              <option value="SMS">SMS</option>
+              <option value="EMAIL">Email</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="externalId">External ID</label>
+            <input type="text" id="externalId" name="externalId" class="form-control" placeholder="Optional">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('createContactModal')">Cancel</button>
+        <button type="submit" class="btn btn-primary">Add Contact</button>
+      </div>
+    </form>
+  </div>
+</div>

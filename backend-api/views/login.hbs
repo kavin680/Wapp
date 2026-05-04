@@ -1,0 +1,27 @@
+<div class="login-container">
+  <div class="login-card">
+    <div class="logo">&#9993;</div>
+    <h1>Enterprise Messaging</h1>
+    <p>Sign in to manage your messaging platform</p>
+
+    {{#if error}}
+    <div class="alert alert-danger">{{error}}</div>
+    {{/if}}
+
+    <form method="POST" action="/admin/login">
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" class="form-control" placeholder="admin@enterprise.com" required value="{{email}}">
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" class="form-control" placeholder="Enter password" required>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+    </form>
+
+    <p class="mt-4 text-muted" style="text-align:center;font-size:12px">
+      <a href="/docs" target="_blank">API Documentation</a>
+    </p>
+  </div>
+</div>
