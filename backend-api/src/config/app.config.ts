@@ -11,4 +11,5 @@ export default registerAs('app', () => ({
   corsOrigins: process.env.CORS_ORIGINS
     ? process.env.CORS_ORIGINS.split(',')
     : ['http://localhost:3001'],
+  encryptionKey: process.env.ENCRYPTION_KEY || '',
 }));

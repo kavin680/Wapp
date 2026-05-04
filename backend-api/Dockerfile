@@ -1,42 +1,40 @@
-FROM node:22-alpine AS base
-RUN apk add --no-cache libc6-compat openssl
+# ─── Stage 1: Build ──────────────────────────────────────────
+FROM node:20-alpine AS builder
+
 WORKDIR /app
 
-# Dependencies
-FROM base AS deps
-COPY package.json package-lock.json ./
-RUN npm ci --only=production && cp -R node_modules /tmp/prod_node_modules
+COPY package*.json ./
 RUN npm ci
 
-# Prisma generate
-FROM deps AS prisma
 COPY prisma ./prisma/
 RUN npx prisma generate
 
-# Build
-FROM prisma AS build
 COPY . .
 RUN npm run build
 
-# Production
-FROM base AS production
+# ─── Stage 2: Production ────────────────────────────────────
+FROM node:20-alpine AS production
+
+RUN apk add --no-cache dumb-init
+
+WORKDIR /app
+
 ENV NODE_ENV=production
 
-RUN addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 nestjs
+COPY package*.json ./
+RUN npm ci --omit=dev
 
-COPY --from=build --chown=nestjs:nodejs /app/dist ./dist
-COPY --from=build --chown=nestjs:nodejs /tmp/prod_node_modules ./node_modules
-COPY --from=build --chown=nestjs:nodejs /app/prisma ./prisma
-COPY --from=build --chown=nestjs:nodejs /app/package.json ./package.json
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 
-RUN npx prisma generate
-
-USER nestjs
+RUN mkdir -p /app/uploads && chown -R node:node /app
+USER node
 
 EXPOSE 3000
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:3000/api/v1/health/ping || exit 1
 
-CMD ["node", "dist/main.js"]
+ENTRYPOINT ["dumb-init", "--"]
+CMD ["node", "dist/main"]

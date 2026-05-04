@@ -16,6 +16,10 @@ export default registerAs('messaging', () => ({
   campaign: {
     batchSize: parseInt(process.env.CAMPAIGN_BATCH_SIZE || '50', 10),
     rateLimit: parseInt(process.env.CAMPAIGN_RATE_LIMIT || '80', 10),
+    schedulerIntervalMs: parseInt(
+      process.env.CAMPAIGN_SCHEDULER_INTERVAL_MS || '60000',
+      10,
+    ),
   },
   billing: {
     enabled: process.env.BILLING_ENABLED === 'true',

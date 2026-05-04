@@ -4,7 +4,12 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PrismaService } from '../../database/prisma.service';
+import { EncryptionService } from '../../common/services';
 import { PaginationQueryDto } from '../../common/dtos';
 import {
   buildPaginatedResult,
@@ -17,17 +22,26 @@ import {
   SendMessageDto,
 } from './dto';
 import { ProviderRegistryService } from './providers/provider-registry.service';
+import { MESSAGE_QUEUE } from './queues';
+import type { SendMessageJobData } from './queues';
 import * as crypto from 'crypto';
 import type { InputJsonValue } from '@prisma/client/runtime/library';
 
 @Injectable()
 export class MessagingService {
   private readonly logger = new Logger(MessagingService.name);
+  private readonly queueEnabled: boolean;
 
   constructor(
     private readonly prisma: PrismaService,
     private readonly providerRegistry: ProviderRegistryService,
-  ) {}
+    private readonly encryptionService: EncryptionService,
+    private readonly configService: ConfigService,
+    private readonly eventEmitter: EventEmitter2,
+    @InjectQueue(MESSAGE_QUEUE) private readonly messageQueue: Queue,
+  ) {
+    this.queueEnabled = this.configService.get<boolean>('queue.enabled', false);
+  }
 
   // ─── Provider CRUD ──────────────────────────────────────────────────────────
 
@@ -86,7 +100,7 @@ export class MessagingService {
     return this.prisma.messagingProvider.delete({ where: { id } });
   }
 
-  // ─── Provider Configuration ─────────────────────────────────────────────────
+  // ─── Provider Configuration (with encryption) ─────────────────────────────
 
   async configureProvider(
     providerId: string,
@@ -97,12 +111,16 @@ export class MessagingService {
 
     const webhookSecret = `whsec_${crypto.randomBytes(24).toString('hex')}`;
 
+    const encryptedCredentials = dto.credentials
+      ? this.encryptionService.encryptJson(dto.credentials)
+      : undefined;
+
     return this.prisma.providerConfig.upsert({
       where: { providerId_userId: { providerId, userId } },
       create: {
         providerId,
         userId,
-        credentials: dto.credentials as InputJsonValue,
+        credentials: encryptedCredentials as unknown as InputJsonValue,
         settings: dto.settings as InputJsonValue,
         isActive: dto.isActive ?? true,
         phoneNumberId: dto.phoneNumberId,
@@ -110,7 +128,7 @@ export class MessagingService {
         webhookSecret,
       },
       update: {
-        credentials: dto.credentials as InputJsonValue,
+        credentials: encryptedCredentials as unknown as InputJsonValue,
         settings: dto.settings as InputJsonValue,
         isActive: dto.isActive,
         phoneNumberId: dto.phoneNumberId,
@@ -125,14 +143,34 @@ export class MessagingService {
       include: { provider: true },
     });
     if (!config) throw new NotFoundException('Provider config not found');
-    return config;
+
+    return {
+      ...config,
+      credentials: this.decryptCredentials(config.credentials),
+    };
   }
 
   async getUserProviderConfigs(userId: string) {
-    return this.prisma.providerConfig.findMany({
+    const configs = await this.prisma.providerConfig.findMany({
       where: { userId },
       include: { provider: true },
     });
+
+    return configs.map((config) => ({
+      ...config,
+      credentials: this.decryptCredentials(config.credentials),
+    }));
+  }
+
+  private decryptCredentials(credentials: unknown): unknown {
+    if (typeof credentials === 'string') {
+      try {
+        return this.encryptionService.decryptJson(credentials);
+      } catch {
+        return credentials;
+      }
+    }
+    return credentials;
   }
 
   // ─── Message Sending ───────────────────────────────────────────────────────
@@ -197,6 +235,48 @@ export class MessagingService {
       return { message, scheduled: true };
     }
 
+    if (this.queueEnabled) {
+      const jobData: SendMessageJobData = {
+        messageId: message.id,
+        providerId: provider.id,
+        providerType: provider.type,
+        to: dto.to,
+        type: dto.type,
+        content: dto.content,
+        templateName: dto.templateName,
+        templateLanguage: dto.templateLanguage,
+        templateVariables: dto.templateVariables,
+        mediaUrl: dto.mediaUrl,
+        userId,
+        conversationId: conversation.id,
+      };
+
+      await this.messageQueue.add('send', jobData, {
+        attempts: this.configService.get<number>(
+          'messaging.retry.maxAttempts',
+          3,
+        ),
+        backoff: {
+          type: 'exponential',
+          delay: this.configService.get<number>(
+            'messaging.retry.backoffMs',
+            1000,
+          ),
+        },
+      });
+
+      return { message, queued: true };
+    }
+
+    return this.sendMessageSync(dto, message, provider, conversation);
+  }
+
+  private async sendMessageSync(
+    dto: SendMessageDto,
+    message: { id: string },
+    provider: { id: string; type: string },
+    conversation: { id: string },
+  ) {
     const providerInstance = this.providerRegistry.get(provider.type);
     const result =
       (dto.type as string) === 'TEMPLATE'
@@ -241,6 +321,13 @@ export class MessagingService {
     await this.prisma.conversation.update({
       where: { id: conversation.id },
       data: { lastMessageAt: new Date() },
+    });
+
+    this.eventEmitter.emit('message.processed', {
+      messageId: message.id,
+      userId: updatedMessage.userId,
+      success: result.success,
+      error: result.error,
     });
 
     return { message: updatedMessage, result };
@@ -424,6 +511,12 @@ export class MessagingService {
         unreadCount: { increment: 1 },
         status: 'OPEN',
       },
+    });
+
+    this.eventEmitter.emit('message.incoming', {
+      userId: config.userId,
+      contactName: contact.displayName,
+      conversationId: conversation.id,
     });
   }
 }
