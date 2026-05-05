@@ -826,7 +826,7 @@ export class AdminController {
       layout: 'layouts/main',
       title: 'Settings',
       user: { email: session.email, role: session.role },
-      settings: formattedSettings,
+      systemSettings: formattedSettings,
       preferences: formattedPrefs,
       flash: req.query?.flash,
       error: req.query?.error,
