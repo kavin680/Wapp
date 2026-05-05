@@ -146,7 +146,7 @@ curl -X POST http://localhost:3000/api/v1/contacts \
   -H "Authorization: Bearer $TOKEN" \
   -H 'Content-Type: application/json' \
   -d '{
-    "phone": "+1234567890",
+    "phoneNumber": "+1234567890",
     "firstName": "John",
     "lastName": "Doe"
   }'
@@ -157,8 +157,8 @@ curl -X POST http://localhost:3000/api/v1/contacts/import \
   -H 'Content-Type: application/json' \
   -d '{
     "contacts": [
-      {"phone": "+1111111111", "firstName": "Alice"},
-      {"phone": "+2222222222", "firstName": "Bob"}
+      {"phoneNumber": "+1111111111", "firstName": "Alice"},
+      {"phoneNumber": "+2222222222", "firstName": "Bob"}
     ]
   }'
 
@@ -174,14 +174,13 @@ curl http://localhost:3000/api/v1/contacts \
 Campaigns let you send the same message to many contacts at once.
 
 ```bash
-# 1. Create a campaign
+# 1. Create a campaign (replace PROVIDER_ID with the ID from Step 4)
 CAMPAIGN=$(curl -s -X POST http://localhost:3000/api/v1/campaigns \
   -H "Authorization: Bearer $TOKEN" \
   -H 'Content-Type: application/json' \
   -d '{
     "name": "Welcome Campaign",
-    "type": "TEXT",
-    "content": {"body": "Welcome to our service!"}
+    "providerId": "PROVIDER_ID"
   }')
 
 CAMPAIGN_ID=$(echo $CAMPAIGN | jq -r '.data.id')
@@ -192,8 +191,8 @@ curl -X POST http://localhost:3000/api/v1/campaigns/$CAMPAIGN_ID/recipients \
   -H 'Content-Type: application/json' \
   -d '{"contactIds": ["contact-id-1", "contact-id-2"]}'
 
-# 3. Launch the campaign
-curl -X POST http://localhost:3000/api/v1/campaigns/$CAMPAIGN_ID/launch \
+# 3. Start the campaign
+curl -X PATCH http://localhost:3000/api/v1/campaigns/$CAMPAIGN_ID/start \
   -H "Authorization: Bearer $TOKEN"
 
 # 4. Check campaign stats
@@ -249,7 +248,7 @@ curl http://localhost:3000/api/v1/billing/summary \
 | List conversations | GET | `/api/v1/conversations` |
 | View conversation messages | GET | `/api/v1/conversations/:id/messages` |
 | Create a campaign | POST | `/api/v1/campaigns` |
-| Launch a campaign | POST | `/api/v1/campaigns/:id/launch` |
+| Start a campaign | PATCH | `/api/v1/campaigns/:id/start` |
 | List templates | GET | `/api/v1/templates` |
 | View analytics | GET | `/api/v1/analytics/dashboard` |
 | Check server health | GET | `/api/v1/health/ping` |

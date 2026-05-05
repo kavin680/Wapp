@@ -134,7 +134,7 @@ All API endpoints use the `/api/v1` prefix. Protected endpoints require a Bearer
 |--------|----------|------|-------------|
 | GET | `/campaigns` | JWT | List campaigns |
 | POST | `/campaigns` | JWT | Create a campaign |
-| POST | `/campaigns/:id/launch` | JWT | Launch a campaign |
+| PATCH | `/campaigns/:id/start` | JWT | Start a campaign |
 | POST | `/campaigns/:id/recipients` | JWT | Add recipients to a campaign |
 | GET | `/campaigns/:id/stats` | JWT | Get campaign statistics |
 
