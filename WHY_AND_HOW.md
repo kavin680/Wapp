@@ -445,15 +445,19 @@ System settings let you configure platform behavior without changing code. User 
 ### How to Use — API
 
 ```bash
-# List all settings
-curl http://localhost:3000/api/v1/settings \
+# List all system settings
+curl http://localhost:3000/api/v1/settings/system \
   -H "Authorization: Bearer $TOKEN"
 
-# Create a setting
-curl -X POST http://localhost:3000/api/v1/settings \
+# Create a system setting
+curl -X POST http://localhost:3000/api/v1/settings/system \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"key": "max_retry_attempts", "value": "3", "category": "messaging"}'
+
+# List user preferences
+curl http://localhost:3000/api/v1/settings/preferences \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
 ---
