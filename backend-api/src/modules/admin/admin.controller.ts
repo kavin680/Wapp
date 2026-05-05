@@ -450,7 +450,7 @@ export class AdminController {
         {
           providerId: body.providerId,
           to: body.to,
-          type: 'text' as any,
+          type: 'TEXT' as any,
           content: { body: body.content },
         },
         session.userId!,
