@@ -285,6 +285,8 @@ Required env vars for production: `JWT_SECRET`, `JWT_REFRESH_SECRET`, `ENCRYPTIO
 
 **New to Wapp?** Start with the [Usage Guide](USAGE_GUIDE.md) — a step-by-step walkthrough from setup to sending your first message.
 
+**Want to understand each feature?** Read the [Why & How Guide](WHY_AND_HOW.md) — explains why each feature exists and how to use it from both the admin dashboard and the API.
+
 Detailed guides are in the [`docs/`](backend-api/docs/) folder:
 
 | Doc | Topic |
